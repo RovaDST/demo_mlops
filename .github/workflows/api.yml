@@ -1,0 +1,61 @@
+# This workflow will do a clean install of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+
+name: Fast-API CI
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install Dependencies
+      run: |
+        pip3 install --upgrade pip
+        pip3 install --no-cache-dir -r requirements.txt
+
+    - name: Run Tests
+      run: PYTHONPATH=app pytest -v
+      
+  build-push-container:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Build and Push Docker Image
+      run: |
+        docker build -t lokilone/fast-api:${GITHUB_SHA} .
+        docker tag lokilone/fast-api:${GITHUB_SHA} lokilone/fast-api:latest
+        docker login -u ${{ secrets.REGISTRY_USER }} -p ${{ secrets.REGISTRY_PASSWD }}
+        docker push lokilone/fast-api:${GITHUB_SHA}
+        docker push lokilone/fast-api:latest
+
+  deploy:
+    needs: build-push-container
+    runs-on: ubuntu-latest
+    steps:
+    - name: Deploy to Server
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HOSTNAME }}
+        username: ${{ secrets.USER_NAME }}
+        key: ${{ secrets.AWS_PRIVATE_KEY }}
+        port: 22
+        script: |
+          sudo docker rm -f fastapi || true
+          sudo docker rmi lokilone/fast-api:latest || true
+          sleep 5
+          sudo docker run -d -p 9000:80 --name fastapi lokilone/fast-api:latest
+          sudo docker ps
+          sleep 5
+          curl localhost:9000 
+          sleep 10 
+          curl localhost:9000
+          ls 
+          sudo docker images

@@ -1,0 +1,11 @@
+version: '3.7'  # Define the Docker Compose version
+
+services:
+  fast-api:
+    container_name: fast-api  # Name of the container
+    build:
+      context: .  # Path to the directory containing the Dockerfile
+      dockerfile: Dockerfile.prod  # Use a specific Dockerfile (Dockerfile.prod)
+    
+    ports:
+      - '8000:8000'  # Map port 8000 on the host to port 8000 in the container
