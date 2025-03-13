@@ -13,4 +13,4 @@ async def read_main():
     Returns:
         dict: A message confirming the API is running.
     """
-    return {"message": "Masterclass Overview MLOPS"}
+    return {"message": "Masterclass Overview MLOP"}
