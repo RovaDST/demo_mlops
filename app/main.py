@@ -8,9 +8,6 @@ app = FastAPI()
 @app.get("/")
 async def read_main():
     """
-    Simple GET request to return a JSON response.
-
-    Returns:
-        dict: A message confirming the API is running.
+    Returns a message confirming the API is running.
     """
-    return {"message": "Masterclass Overview MLOP"}
+    return {"message": "Masterclass Overview MLOPS"}
