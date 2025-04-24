@@ -10,4 +10,4 @@ async def read_main():
     """
     Returns a message confirming the API is running.
     """
-    return {"message": "Masterclass Overview MLOP"}
+    return {"message": "Masterclass Overview MLOPS"}
